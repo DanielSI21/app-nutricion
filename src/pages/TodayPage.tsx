@@ -1,6 +1,7 @@
 import { Apple, ChevronRight, Clock3, Coffee, MoonStar, Salad, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MacroSummary } from '../components/MacroSummary';
+import { ModalLayer } from '../components/ModalLayer';
 import { sumMealLogs } from '../domain/calculations';
 import type { MealId, MealStatus, PlanMeal } from '../domain/types';
 import { useNutrition } from '../state/NutritionContext';
@@ -48,7 +49,7 @@ function DifferenceDialog({ mealId }: { mealId: MealId }) {
   const classification = log.classification;
   const direction = classification === 'under' ? 'menos de lo planeado' : classification === 'over' ? 'más de lo planeado' : 'una distribución diferente';
   const focus = Math.abs(log.macros.fat - meal.plannedMacros.fat) > Math.abs(log.macros.protein - meal.plannedMacros.protein) ? 'grasa' : 'proteína';
-  return <div className="dialog-backdrop" role="presentation">
+  return <ModalLayer><div className="dialog-backdrop" role="presentation">
     <section className="dialog-card" role="dialog" aria-modal="true" aria-labelledby="difference-title">
       <span className="dialog-icon"><Sparkles /></span>
       <p className="eyebrow">Revisemos el resto del día</p>
@@ -57,7 +58,7 @@ function DifferenceDialog({ mealId }: { mealId: MealId }) {
       <div className="dialog-note">Los ajustes automáticos no sustituyen las indicaciones de tu nutrióloga.</div>
       <div className="dialog-actions"><button className="button button--secondary" onClick={() => keepPlan(mealId)}>Conservar plan</button><button className="button button--primary" onClick={() => { createProposal(mealId); navigate('/propuesta'); }}>Ver propuesta</button></div>
     </section>
-  </div>;
+  </div></ModalLayer>;
 }
 
 export function TodayPage() {

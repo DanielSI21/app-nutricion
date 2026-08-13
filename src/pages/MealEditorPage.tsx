@@ -1,6 +1,7 @@
 import { ArrowLeft, Check, ChevronRight, Minus, Plus, Search, Trash2, UtensilsCrossed, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ModalLayer } from '../components/ModalLayer';
 import { addMacros, scaleFood, ZERO_MACROS } from '../domain/calculations';
 import type { FoodLogEntry, MealId, Unit } from '../domain/types';
 import { foodEntryFromFood, foodEntryFromRecipe, useNutrition } from '../state/NutritionContext';
@@ -92,9 +93,9 @@ export function MealEditorPage() {
       </section>
       <aside className="editor-summary"><p className="eyebrow">Antes de guardar</p><h2>Comparación</h2><Comparison planned={meal.plannedMacros} actual={actual} /><div className="editor-actions"><button className="button button--ghost button--full" onClick={() => { if (window.confirm('¿Registrar que no comiste esta comida?')) { saveChangedMeal(mealId, [], true); navigate('/'); } }}>No comí esta comida</button><button className="button button--primary button--full" onClick={() => { saveChangedMeal(mealId, entries); navigate('/'); }} disabled={!entries.length}>Guardar registro</button></div></aside>
     </div>
-    {pickerOpen && <div className="dialog-backdrop"><section className="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title"><div className="sheet-handle" /><div className="picker-head"><div><p className="eyebrow">Catálogo</p><h2 id="picker-title">Añadir a {meal.name.toLocaleLowerCase('es-MX')}</h2></div><button className="icon-button" onClick={() => setPickerOpen(false)} aria-label="Cerrar"><X /></button></div><label className="search-field"><Search size={19} /><span className="sr-only">Buscar alimento o marca</span><input autoFocus value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar alimento o marca" /></label><div className="picker-results">
+    {pickerOpen && <ModalLayer><div className="dialog-backdrop"><section className="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title"><div className="sheet-handle" /><div className="picker-head"><div><p className="eyebrow">Catálogo</p><h2 id="picker-title">Añadir a {meal.name.toLocaleLowerCase('es-MX')}</h2></div><button className="icon-button" onClick={() => setPickerOpen(false)} aria-label="Cerrar"><X /></button></div><label className="search-field"><Search size={19} /><span className="sr-only">Buscar alimento o marca</span><input autoFocus value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar alimento o marca" /></label><div className="picker-results">
       {foods.map((food) => <article className="food-result" key={food.id}><div><strong>{food.name}</strong><span>{food.referenceQuantity} {food.referenceUnit} · {formatKcal(food.macros.kcal)}</span><small>{food.source}</small></div>{food.id === 'popcorn' ? <div className="quick-actions"><button onClick={() => addFood(food.id, 60, 'g')}>½ cubeta</button><button onClick={() => addFood(food.id, 120, 'g')}>1 cubeta</button></div> : <button className="round-add" onClick={() => addFood(food.id)} aria-label={`Agregar ${food.name}`}><Plus /></button>}</article>)}
       <p className="picker-section-label">Recetas</p>{state.recipes.map((recipe) => <button className="recipe-result" key={recipe.id} onClick={() => addRecipe(recipe.id)}><span><strong>{recipe.name}</strong><small>{recipe.mode === 'manual' ? 'Información manual' : `${recipe.ingredients.length} ingredientes`}</small></span><Plus /></button>)}
-    </div></section></div>}
+    </div></section></div></ModalLayer>}
   </main>;
 }

@@ -27,3 +27,25 @@
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
 @media(max-width:360px){.page{padding-inline:10px}.topbar{padding-inline:11px}.brand-copy{display:none}.meal-card__header{gap:8px}.meal-icon{width:38px;height:38px}.status{margin-left:auto}.meal-card__footer{align-items:flex-end}.meal-macros{flex-direction:column;align-items:flex-start;gap:2px}.bottom-nav{left:5px;right:5px}.comparison-head,.comparison-row{grid-template-columns:1fr .9fr .9fr .9fr}.comparison-row strong{font-size:8px}.comparison-row span{font-size:7px}.dialog-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* Global modal layer: rendered outside .page so mobile navigation can never overlap it. */
+body.modal-open{overflow:hidden;overscroll-behavior:none}
+.modal-layer{position:fixed;z-index:1000;inset:0;isolation:isolate}
+.modal-layer .dialog-backdrop{position:absolute;z-index:1;overflow:hidden;-webkit-backdrop-filter:blur(7px)}
+.modal-layer .dialog-card,.modal-layer .manual-dialog{max-height:calc(100dvh - 36px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+@media(max-width:640px){
+  .modal-layer .dialog-backdrop{align-items:flex-end;padding:max(8px,env(safe-area-inset-top)) 0 0}
+  .modal-layer .dialog-card,.modal-layer .manual-dialog,.modal-layer .picker-sheet,.modal-layer .food-detail-sheet{width:100%;max-height:calc(100dvh - max(8px,env(safe-area-inset-top)));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;border-radius:28px 28px 0 0;padding-bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px))}
+  .modal-layer .dialog-actions{padding-bottom:2px}
+  .modal-layer .dialog-actions .button{min-height:52px}
+}
+
+@media(max-width:640px) and (max-height:700px){
+  .modal-layer .dialog-card{padding-top:18px}
+  .modal-layer .dialog-icon{width:42px;height:42px;margin-bottom:11px}
+  .modal-layer .dialog-card h2{font-size:23px;line-height:1.15}
+  .modal-layer .dialog-card>p:not(.eyebrow){font-size:12px;line-height:1.5}
+  .modal-layer .dialog-note{margin:11px 0;padding:10px}
+  .modal-layer .dialog-actions{margin-top:13px}
+}
