@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Calculadora de calorías — Diana Sandoval Nutrición</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Calcula tus calorías estimadas de mantenimiento, déficit o superávit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#5C6430;--primary-soft:#AEB38B;--bg:#F8F9F7;--glass:rgba(255,255,255,.68);--glass-border:rgba(255,255,255,.55);--muted:#6B6F64;--border:#D9DDD2;--text:#1F1F1F;--soft:#EEF1E7;--error:#B3261E;--error-bg:rgba(179,38,30,.10)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Manrope',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.app{position:relative;min-height:100vh;overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(170deg,#F1F4EC 0%,#F8F9F7 40%,#F5F7F1 100%)}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;pointer-events:none;z-index:0}
+.b1{width:520px;height:520px;background:radial-gradient(circle,#C7CE9E,transparent 70%);top:-160px;right:-120px}
+.b2{width:460px;height:460px;background:radial-gradient(circle,#DCE6C6,transparent 70%);bottom:-180px;left:-140px}
+.b3{width:360px;height:360px;background:radial-gradient(circle,#EBF0DC,transparent 70%);top:40%;left:55%}
+.hdr{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:22px 28px}
+.logo{display:flex;align-items:center;gap:11px}
+.mark{width:48px;height:48px;border-radius:50%;display:block;object-fit:cover;filter:drop-shadow(0 6px 18px rgba(92,100,48,.22))}
+.brand{display:flex;flex-direction:column;line-height:1.1}
+.brand b{font-weight:800;font-size:15px;letter-spacing:-.2px}
+.brand span{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.wrap{position:relative;z-index:2;flex:1;width:100%;max-width:720px;margin:0 auto;padding:14px 22px 70px}
+.htitle{text-align:center;font-size:40px;font-weight:800;letter-spacing:-1.2px;margin:10px 0 10px}
+.hsub{text-align:center;font-size:16px;line-height:1.55;color:var(--muted);max-width:440px;margin:0 auto 30px}
+.card{position:relative;background:var(--glass);backdrop-filter:blur(26px) saturate(1.4);-webkit-backdrop-filter:blur(26px) saturate(1.4);border:1px solid var(--glass-border);box-shadow:0 24px 80px rgba(92,100,48,.13),inset 0 1px 0 rgba(255,255,255,.6);border-radius:34px;padding:34px 34px 30px}
+.stepper{margin-bottom:34px}
+.track{position:relative;height:4px;background:rgba(92,100,48,.12);border-radius:99px;margin:0 6px 20px}
+.fill{position:absolute;top:0;left:0;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--primary-soft));box-shadow:0 0 12px rgba(92,100,48,.4);transition:width .6s cubic-bezier(.16,1,.3,1)}
+.dots{display:flex;justify-content:space-between}
+.col{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1}
+.dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;background:rgba(255,255,255,.7);border:1.5px solid var(--border);color:var(--muted);transition:all .4s cubic-bezier(.16,1,.3,1)}
+.dcap{font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.01em;transition:color .3s}
+.dot.act{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 6px 16px rgba(92,100,48,.32);transform:scale(1.08)}
+.dot.done{background:var(--soft);border-color:var(--primary-soft);color:var(--primary)}
+.dcap.on{color:var(--primary);font-weight:700}
+.step{animation:sIn .45s cubic-bezier(.16,1,.3,1) both}
+.step.rev{animation:sInR .45s cubic-bezier(.16,1,.3,1) both}
+@keyframes sIn{from{opacity:0;transform:translateX(38px)}to{opacity:1;transform:none}}
+@keyframes sInR{from{opacity:0;transform:translateX(-38px)}to{opacity:1;transform:none}}
+.slabel{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--primary);margin:0 0 4px}
+.stitle{font-size:22px;font-weight:800;letter-spacing:-.5px;margin:0 0 22px}
+.methods{display:flex;flex-direction:column;gap:14px}
+.method{text-align:left;cursor:pointer;background:rgba(255,255,255,.6);border:1.5px solid var(--border);border-radius:22px;padding:20px 22px;transition:all .3s cubic-bezier(.16,1,.3,1);display:flex;gap:16px;align-items:flex-start;width:100%;font:inherit;color:inherit}
+.method:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(92,100,48,.1)}
+.method.sel{border-color:var(--primary);background:linear-gradient(145deg,rgba(238,241,231,.9),rgba(255,255,255,.8));box-shadow:0 12px 34px rgba(92,100,48,.16)}
+.mcheck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);margin-top:2px;transition:all .3s;position:relative}
+.method.sel .mcheck{border-color:var(--primary);background:var(--primary)}
+.method.sel .mcheck::after{content:'';position:absolute;inset:0;margin:auto;width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-1px) rotate(-45deg)}
+.mname{font-size:17px;font-weight:800;letter-spacing:-.3px;margin:0 0 4px}
+.mdesc{font-size:13.5px;line-height:1.5;color:var(--muted);margin:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:9px}
+.field.full{grid-column:1 / -1}
+.flabel{font-size:13.5px;font-weight:700;color:var(--text);padding-left:4px}
+.iwrap{position:relative;display:flex;align-items:center}
+.input{width:100%;height:56px;border-radius:999px;background:rgba(255,255,255,.82);border:1.5px solid rgba(217,221,210,.9);padding:0 22px;font-size:16px;font-family:inherit;font-weight:600;color:var(--text);outline:none;transition:all .25s ease;box-shadow:inset 0 1px 2px rgba(0,0,0,.02)}
+.input::placeholder{color:#A9AD9F;font-weight:500}
+.input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(92,100,48,.13),0 4px 16px rgba(92,100,48,.08)}
+.input.err{border-color:var(--error);background:#fff}
+.input.err:focus{box-shadow:0 0 0 4px var(--error-bg),0 4px 16px rgba(179,38,30,.08)}
+.select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.selectwrap::after{content:'';position:absolute;top:50%;right:22px;width:9px;height:9px;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.unit{position:absolute;right:22px;font-size:14px;font-weight:600;color:var(--muted);pointer-events:none}
+.input.hasunit{padding-right:56px}
+.ferr{max-height:0;opacity:0;overflow:hidden;color:var(--error);font-size:12.5px;font-weight:700;padding-left:4px;transition:all .25s ease}
+.ferr.show{max-height:40px;opacity:1;margin-top:1px}
+.seg{display:flex;gap:10px;background:rgba(255,255,255,.55);border:1.5px solid var(--border);border-radius:999px;padding:5px}
+.segb{flex:1;height:46px;border-radius:999px;border:none;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1)}
+.segb.sel{background:#fff;color:var(--primary);box-shadow:0 4px 14px rgba(92,100,48,.15)}
+.opts{display:flex;flex-direction:column;gap:11px}
+.opt{cursor:pointer;text-align:left;background:rgba(255,255,255,.62);border:1.5px solid var(--border);border-radius:18px;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:all .28s cubic-bezier(.16,1,.3,1);width:100%;font:inherit;color:inherit}
+.opt:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(92,100,48,.09)}
+.opt.sel{border-color:var(--primary);background:linear-gradient(145deg,rgba(238,241,231,.9),rgba(255,255,255,.75));box-shadow:0 10px 26px rgba(92,100,48,.14)}
+.oname{font-size:15.5px;font-weight:800;margin:0}
+.odesc{font-size:12.5px;color:var(--muted);margin:2px 0 0}
+.ofac{flex:none;font-size:13px;font-weight:800;color:var(--primary);background:var(--soft);border-radius:99px;padding:6px 13px}
+.subh{font-size:14px;font-weight:800;margin:26px 0 13px;padding-left:4px;letter-spacing:-.2px}
+.activity-summary{margin-top:14px;background:var(--soft);border-radius:16px}
+.goals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.goal{cursor:pointer;background:rgba(255,255,255,.62);border:1.5px solid var(--border);border-radius:20px;padding:18px 12px;text-align:center;transition:all .28s cubic-bezier(.16,1,.3,1);font:inherit;color:inherit}
+.goal:hover{transform:translateY(-2px)}
+.goal.sel{border-color:var(--primary);background:linear-gradient(160deg,rgba(238,241,231,.95),rgba(255,255,255,.8));box-shadow:0 12px 30px rgba(92,100,48,.16)}
+.gname{font-size:15px;font-weight:800;margin:0}
+.gsub{font-size:11.5px;color:var(--muted);margin:4px 0 0}
+.adjusts{display:flex;flex-wrap:wrap;gap:10px;animation:sIn .4s cubic-bezier(.16,1,.3,1) both}
+.adjust{cursor:pointer;min-width:64px;height:48px;padding:0 18px;border-radius:999px;border:1.5px solid var(--border);background:rgba(255,255,255,.7);font-family:inherit;font-size:15px;font-weight:800;color:var(--muted);transition:all .28s cubic-bezier(.16,1,.3,1)}
+.rangebox{background:rgba(255,255,255,.62);border:1.5px solid var(--border);border-radius:18px;padding:18px 20px 20px}
+.rangelabel{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.rangelabel span:first-child{font-size:14px;font-weight:800;color:var(--text)}
+.rangeval{font-size:18px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
+.rangeinput{width:100%;height:8px;border-radius:999px;appearance:none;-webkit-appearance:none;background:linear-gradient(90deg,var(--primary) var(--pct-fill, 0%),var(--border) var(--pct-fill, 0%));outline:none;cursor:pointer}
+.rangeinput::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:6px solid var(--primary);box-shadow:0 5px 14px rgba(92,100,48,.28);transition:transform .2s}
+.rangeinput::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:6px solid var(--primary);box-shadow:0 5px 14px rgba(92,100,48,.28);transition:transform .2s}
+.rangeinput:hover::-webkit-slider-thumb{transform:scale(1.08)}
+.rangeinput:hover::-moz-range-thumb{transform:scale(1.08)}
+.rangemarks{display:flex;justify-content:space-between;margin-top:10px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:13px;margin:6px 0 20px;padding:14px 18px;background:rgba(255,255,255,.5);border:1.5px solid var(--border);border-radius:18px;cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit}
+.sw{flex:none;width:48px;height:28px;border-radius:99px;background:var(--border);position:relative;transition:background .3s}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.sw.on{background:var(--primary)}
+.sw.on::after{transform:translateX(20px)}
+.ttext{font-size:14px;font-weight:600;color:var(--text)}
+.ttext span{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:2px}
+.nav{display:flex;gap:14px;margin-top:30px}
+.btn{height:56px;border-radius:999px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;border:none;transition:all .28s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;justify-content:center;gap:8px}
+.prev{flex:none;padding:0 26px;background:rgba(255,255,255,.7);border:1.5px solid var(--border);color:var(--text)}
+.prev:hover{background:#fff;transform:translateY(-1px)}
+.next{flex:1;background:linear-gradient(135deg,var(--primary),#6d7640);color:#fff;box-shadow:0 12px 30px rgba(92,100,48,.3)}
+.next:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(92,100,48,.36)}
+.next:disabled{opacity:.42;cursor:not-allowed;box-shadow:none;transform:none}
+.rhero{position:relative;overflow:hidden;text-align:center;background:linear-gradient(150deg,var(--primary),#6d7640 60%,#7f8a4a);border-radius:28px;padding:34px 24px 30px;box-shadow:0 20px 50px rgba(92,100,48,.3),inset 0 1px 0 rgba(255,255,255,.25);margin-bottom:22px}
+.rhero::before{content:'';position:absolute;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.12);top:-120px;right:-70px;filter:blur(10px)}
+.rgoal{position:relative;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.8);margin:0 0 6px}
+.rnum{position:relative;font-size:60px;font-weight:800;letter-spacing:-2px;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+.rnum small{font-size:22px;font-weight:700;opacity:.85;letter-spacing:0}
+.rcap{position:relative;font-size:13.5px;color:rgba(255,255,255,.82);margin:10px 0 0;font-weight:600}
+.rrows{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.55);border:1.5px solid var(--glass-border);border-radius:22px;padding:8px 6px}
+.rrow{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:14px;transition:background .2s}
+.rrow:hover{background:rgba(255,255,255,.6)}
+.rk{font-size:14.5px;font-weight:600;color:var(--muted)}
+.rv{font-size:16px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.rv.hi{color:var(--primary)}
+.method:focus-visible,.opt:focus-visible,.goal:focus-visible,.adjust:focus-visible,.rangeinput:focus-visible,.segb:focus-visible,.toggle:focus-visible,.btn:focus-visible,.input:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+@media (max-width:640px){.wrap{padding:6px 14px 60px}.htitle{font-size:30px}.hsub{font-size:15px;margin-bottom:22px}.card{padding:24px 20px 24px;border-radius:28px}.grid2{grid-template-columns:1fr}.goals{grid-template-columns:1fr}.dcap{display:none}.stitle{font-size:20px}.rnum{font-size:48px}.nav{flex-direction:column-reverse}.prev,.next{width:100%;flex:none;min-height:56px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="blob b1" aria-hidden="true"></div>
+  <div class="blob b2" aria-hidden="true"></div>
+  <div class="blob b3" aria-hidden="true"></div>
+  <header class="hdr">
+    <div class="logo">
+      <img class="mark" src="assets/logo.png" alt="" aria-hidden="true">
+      <div class="brand"><b>Diana Sandoval</b><span>Nutrición</span></div>
+    </div>
+  </header>
+  <main class="wrap">
+    <h1 class="htitle">Calculadora de calorías</h1>
+    <p class="hsub">Calcula tus calorías estimadas de mantenimiento, déficit o superávit de forma sencilla.</p>
+    <div class="card">
+      <div class="stepper">
+        <div class="track"><div class="fill" id="fill"></div></div>
+        <div class="dots" id="dots"></div>
+      </div>
+      <div id="stepBody"></div>
+      <div class="nav" id="nav"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var RANGES = { weight:[30,300], height:[100,250], age:[10,100], leanMass:[20,200], bodyFat:[3,70] };
+
+  var state = {
+    step: 1, dir: 1,
+    method: null,
+    sex: null, weight: '', height: '', age: '',
+    leanMass: '', bodyFat: '', useBF: false,
+    lifestyleFactor: null, exerciseFactor: null, goal: null, adjustPct: null,
+    errors: {}
+  };
+
+  var finalRAF = null, finalTO = null;
+
+  function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+  function fmt(n){ return Math.round(n).toLocaleString('es-MX'); }
+  function fmtFactor(n){ return (Math.round(n * 100) / 100).toFixed(2).replace(/\.?0+$/, ''); }
+
+  function effLean(){
+    if (state.useBF) return num(state.weight) * (1 - num(state.bodyFat) / 100);
+    return num(state.leanMass);
+  }
+
+  function activityFactor(){
+    if (state.lifestyleFactor === null || state.exerciseFactor === null) return 0;
+    return num(state.lifestyleFactor) + num(state.exerciseFactor);
+  }
+
+  function compute(){
+    var tmb = 0;
+    if (state.method === 'mifflin') {
+      var w = num(state.weight), h = num(state.height), a = num(state.age);
+      tmb = (10 * w) + (6.25 * h) - (5 * a) + (state.sex === 'male' ? 5 : -161);
+    } else if (state.method === 'katch') {
+      tmb = 370 + (21.6 * effLean());
+    }
+    tmb = Math.max(0, tmb);
+    var factor = activityFactor();
+    var cal = tmb * factor;
+    var eta = tmb * 0.10;
+    var maint = cal + eta;
+    var pct = state.adjustPct || 0;
+    var ajuste = maint * (pct / 100);
+    var fin = maint;
+    if (state.goal === 'deficit') fin = maint - ajuste;
+    else if (state.goal === 'superavit') fin = maint + ajuste;
+    return { tmb: tmb, factor: factor, cal: cal, eta: eta, maint: maint, ajuste: ajuste, fin: fin, pct: pct };
+  }
+
+  function validateField(key){
+    var raw = state[key];
+    if (raw === '' || raw === null || raw === undefined) return 'Este campo es obligatorio.';
+    var n = Number(raw);
+    if (isNaN(n)) return 'Ingresa un número válido.';
+    var range = RANGES[key];
+    if (n < range[0] || n > range[1]) return 'Debe estar entre ' + range[0] + ' y ' + range[1] + '.';
+    return null;
+  }
+
+  function validateStep2All(){
+    var errors = {};
+    var firstInvalid = null;
+    function mark(key, msg){ errors[key] = msg; if (msg && !firstInvalid) firstInvalid = key; }
+    if (state.method === 'mifflin') {
+      mark('sex', state.sex ? null : 'Selecciona una opción.');
+      mark('weight', validateField('weight'));
+      mark('height', validateField('height'));
+      mark('age', validateField('age'));
+    } else if (state.method === 'katch') {
+      if (state.useBF) {
+        mark('weight', validateField('weight'));
+        mark('bodyFat', validateField('bodyFat'));
+      } else {
+        mark('leanMass', validateField('leanMass'));
+      }
+    }
+    state.errors = errors;
+    return { ok: !firstInvalid, firstInvalid: firstInvalid };
+  }
+
+  function canProceedStep3(){
+    if (state.lifestyleFactor === null || state.exerciseFactor === null || !state.goal) return false;
+    if ((state.goal === 'deficit' || state.goal === 'superavit') && state.adjustPct === null) return false;
+    return true;
+  }
+
+  // ---------- rendering ----------
+
+  function updateStepper(){
+    var labels = ['Método', 'Datos', 'Objetivo', 'Resultado'];
+    document.getElementById('fill').style.width = ((state.step - 1) / 3 * 100) + '%';
+    for (var i = 1; i <= 4; i++) {
+      var done = i < state.step, act = i === state.step;
+      var dot = document.getElementById('dot' + i), cap = document.getElementById('cap' + i);
+      dot.className = 'dot' + (act ? ' act' : done ? ' done' : '');
+      dot.textContent = done ? '✓' : String(i);
+      cap.className = 'dcap' + (act ? ' on' : '');
+    }
+  }
+
+  function buildStep1(){
+    var m = state.method;
+    return '' +
+      '<p class="slabel">Paso 1</p>' +
+      '<h2 class="stitle" id="stepTitle">Elige tu método de cálculo</h2>' +
+      '<div class="methods" role="group" aria-labelledby="stepTitle">' +
+        '<button type="button" class="method' + (m === 'mifflin' ? ' sel' : '') + '" id="mMifflin" aria-pressed="' + (m === 'mifflin') + '">' +
+          '<span class="mcheck" aria-hidden="true"></span>' +
+          '<span><p class="mname">Mifflin-St Jeor</p><p class="mdesc">Recomendado si no conoces tu masa magra. Usa peso, altura, edad y sexo.</p></span>' +
+        '</button>' +
+        '<button type="button" class="method' + (m === 'katch' ? ' sel' : '') + '" id="mKatch" aria-pressed="' + (m === 'katch') + '">' +
+          '<span class="mcheck" aria-hidden="true"></span>' +
+          '<span><p class="mname">Katch-McArdle</p><p class="mdesc">Recomendado si conoces tu masa magra o porcentaje de grasa corporal.</p></span>' +
+        '</button>' +
+      '</div>';
+  }
+
+  function buildStep2(){
+    var e = state.errors;
+    if (state.method === 'mifflin') {
+      return '' +
+        '<p class="slabel">Paso 2</p>' +
+        '<h2 class="stitle">Ingresa tus datos corporales</h2>' +
+        '<div class="field full" style="margin-bottom:16px">' +
+          '<label class="flabel" id="lbl-sex">Sexo</label>' +
+          '<div class="seg" role="group" aria-labelledby="lbl-sex">' +
+            '<button type="button" class="segb' + (state.sex === 'male' ? ' sel' : '') + '" id="segMale" aria-pressed="' + (state.sex === 'male') + '">Hombre</button>' +
+            '<button type="button" class="segb' + (state.sex === 'female' ? ' sel' : '') + '" id="segFemale" aria-pressed="' + (state.sex === 'female') + '">Mujer</button>' +
+          '</div>' +
+          '<div class="ferr' + (e.sex ? ' show' : '') + '" id="err-sex" role="alert">' + (e.sex || '') + '</div>' +
+        '</div>' +
+        '<div class="grid2">' +
+          '<div class="field">' +
+            '<label class="flabel" for="f-weight">Peso</label>' +
+            '<div class="iwrap"><input class="input hasunit' + (e.weight ? ' err' : '') + '" id="f-weight" type="number" inputmode="decimal" min="30" max="300" step="0.1" placeholder="70" value="' + state.weight + '"><span class="unit">kg</span></div>' +
+            '<div class="ferr' + (e.weight ? ' show' : '') + '" id="err-weight" role="alert">' + (e.weight || '') + '</div>' +
+          '</div>' +
+          '<div class="field">' +
+            '<label class="flabel" for="f-height">Altura</label>' +
+            '<div class="iwrap"><input class="input hasunit' + (e.height ? ' err' : '') + '" id="f-height" type="number" inputmode="decimal" min="100" max="250" step="0.1" placeholder="170" value="' + state.height + '"><span class="unit">cm</span></div>' +
+            '<div class="ferr' + (e.height ? ' show' : '') + '" id="err-height" role="alert">' + (e.height || '') + '</div>' +
+          '</div>' +
+          '<div class="field full">' +
+            '<label class="flabel" for="f-age">Edad</label>' +
+            '<div class="iwrap"><input class="input hasunit' + (e.age ? ' err' : '') + '" id="f-age" type="number" inputmode="numeric" min="10" max="100" step="1" placeholder="28" value="' + state.age + '"><span class="unit">años</span></div>' +
+            '<div class="ferr' + (e.age ? ' show' : '') + '" id="err-age" role="alert">' + (e.age || '') + '</div>' +
+          '</div>' +
+        '</div>';
+    }
+    if (state.method === 'katch') {
+      var est = effLean();
+      return '' +
+        '<p class="slabel">Paso 2</p>' +
+        '<h2 class="stitle">Ingresa tus datos corporales</h2>' +
+        '<button type="button" class="toggle" id="bfToggle" aria-pressed="' + state.useBF + '">' +
+          '<span class="sw' + (state.useBF ? ' on' : '') + '" aria-hidden="true"></span>' +
+          '<span class="ttext">Calcular masa magra con % de grasa<span>Actívalo si no conoces tu masa magra directa</span></span>' +
+        '</button>' +
+        (!state.useBF ?
+          '<div class="field full">' +
+            '<label class="flabel" for="f-leanMass">Masa magra</label>' +
+            '<div class="iwrap"><input class="input hasunit' + (e.leanMass ? ' err' : '') + '" id="f-leanMass" type="number" inputmode="decimal" min="20" max="200" step="0.1" placeholder="55" value="' + state.leanMass + '"><span class="unit">kg</span></div>' +
+            '<div class="ferr' + (e.leanMass ? ' show' : '') + '" id="err-leanMass" role="alert">' + (e.leanMass || '') + '</div>' +
+          '</div>'
+        :
+          '<div>' +
+            '<div class="grid2">' +
+              '<div class="field">' +
+                '<label class="flabel" for="f-weight">Peso</label>' +
+                '<div class="iwrap"><input class="input hasunit' + (e.weight ? ' err' : '') + '" id="f-weight" type="number" inputmode="decimal" min="30" max="300" step="0.1" placeholder="70" value="' + state.weight + '"><span class="unit">kg</span></div>' +
+                '<div class="ferr' + (e.weight ? ' show' : '') + '" id="err-weight" role="alert">' + (e.weight || '') + '</div>' +
+              '</div>' +
+              '<div class="field">' +
+                '<label class="flabel" for="f-bodyFat">% de grasa</label>' +
+                '<div class="iwrap"><input class="input hasunit' + (e.bodyFat ? ' err' : '') + '" id="f-bodyFat" type="number" inputmode="decimal" min="3" max="70" step="0.1" placeholder="18" value="' + state.bodyFat + '"><span class="unit">%</span></div>' +
+                '<div class="ferr' + (e.bodyFat ? ' show' : '') + '" id="err-bodyFat" role="alert">' + (e.bodyFat || '') + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="rrow" style="margin-top:14px;background:var(--soft);border-radius:16px">' +
+              '<span class="rk">Masa magra estimada</span><span class="rv hi" id="leanEstLabel">' + (est > 0 ? fmt(est) : '—') + ' kg</span>' +
+            '</div>' +
+          '</div>'
+        );
+    }
+    return '';
+  }
+
+  var LIFESTYLE_DEFS = [
+    { value: 0.6, label: 'Sedentario', desc: 'Trabajo de escritorio' },
+    { value: 0.7, label: 'Actividad física ligera', desc: 'De pie y caminar poco durante el día' },
+    { value: 0.8, label: 'Actividad moderada', desc: 'De pie y caminar la mayor parte del día' },
+    { value: 0.9, label: 'Actividad alta', desc: 'Casi todo el día de pie' },
+    { value: 1.0, label: 'Actividad extrema', desc: 'Trabajo físico intenso o construcción' }
+  ];
+
+  var EXERCISE_DEFS = [
+    { value: 0.55, label: 'Sedentario', desc: 'No haces ejercicio' },
+    { value: 0.65, label: 'Ejercicio ligero', desc: 'Algo de cardio algunos días a la semana' },
+    { value: 0.75, label: 'Ejercicio moderado', desc: 'Varios días con algo de pesas' },
+    { value: 0.85, label: 'Ejercicio intenso', desc: 'Pesas al menos 5 días a la semana' },
+    { value: 0.95, label: 'Ejercicio extremo', desc: 'Más de 2 horas todos los días' }
+  ];
+
+  function buildActivityOptions(defs, selected){
+    return '<option value="">Selecciona una opción</option>' + defs.map(function(a){
+      var sel = selected === a.value;
+      return '<option value="' + a.value + '"' + (sel ? ' selected' : '') + '>' +
+        a.label + ' · ' + a.desc + ' (' + fmtFactor(a.value) + ')' +
+      '</option>';
+    }).join('');
+  }
+
+  function buildStep3(){
+    var factor = activityFactor();
+    var showAdjust = state.goal === 'deficit' || state.goal === 'superavit';
+    var pct = state.adjustPct === null ? 10 : state.adjustPct;
+    var adjustHtml = '<div class="rangebox">' +
+      '<label class="rangelabel" for="adjustRange">' +
+        '<span>Ajuste elegido</span>' +
+        '<span class="rangeval" id="adjustPctLabel">' + pct + '%</span>' +
+      '</label>' +
+      '<input class="rangeinput" id="adjustRange" type="range" min="0" max="100" step="5" value="' + pct + '" style="--pct-fill:' + pct + '%">' +
+      '<div class="rangemarks" aria-hidden="true"><span>0%</span><span>50%</span><span>100%</span></div>' +
+    '</div>';
+    return '' +
+      '<p class="slabel">Paso 3</p>' +
+      '<h2 class="stitle">Actividad y objetivo</h2>' +
+      '<div class="subh" id="actLabel">Factor de actividad</div>' +
+      '<div class="grid2" aria-labelledby="actLabel">' +
+        '<div class="field">' +
+          '<label class="flabel" for="lifestyleFactor">Estilo de vida</label>' +
+          '<div class="iwrap selectwrap"><select class="input select" id="lifestyleFactor">' + buildActivityOptions(LIFESTYLE_DEFS, state.lifestyleFactor) + '</select></div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label class="flabel" for="exerciseFactor">Actividad física</label>' +
+          '<div class="iwrap selectwrap"><select class="input select" id="exerciseFactor">' + buildActivityOptions(EXERCISE_DEFS, state.exerciseFactor) + '</select></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rrow activity-summary">' +
+        '<span class="rk">Factor general de actividad</span><span class="rv hi">' + (factor > 0 ? '×' + fmtFactor(factor) : '—') + '</span>' +
+      '</div>' +
+      '<div class="subh" id="goalLabelH">Objetivo</div>' +
+      '<div class="goals" role="group" aria-labelledby="goalLabelH">' +
+        '<button type="button" class="goal' + (state.goal === 'mantenimiento' ? ' sel' : '') + '" id="goalMaint" aria-pressed="' + (state.goal === 'mantenimiento') + '"><p class="gname">Mantenimiento</p><p class="gsub">Conservar peso</p></button>' +
+        '<button type="button" class="goal' + (state.goal === 'deficit' ? ' sel' : '') + '" id="goalDef" aria-pressed="' + (state.goal === 'deficit') + '"><p class="gname">Déficit</p><p class="gsub">Perder grasa</p></button>' +
+        '<button type="button" class="goal' + (state.goal === 'superavit' ? ' sel' : '') + '" id="goalSup" aria-pressed="' + (state.goal === 'superavit') + '"><p class="gname">Superávit</p><p class="gsub">Ganar músculo</p></button>' +
+      '</div>' +
+      (showAdjust ?
+        '<div><div class="subh" id="pctLabel">Porcentaje de ajuste</div>' + adjustHtml + '</div>'
+        : '');
+  }
+
+  function buildStep4(){
+    var c = compute();
+    var methodLabel = state.method === 'mifflin' ? 'Mifflin-St Jeor' : 'Katch-McArdle';
+    var goalLabel = state.goal === 'deficit' ? 'Déficit' : state.goal === 'superavit' ? 'Superávit' : 'Mantenimiento';
+    var adjustLabel;
+    if (state.goal === 'deficit') adjustLabel = 'Déficit de ' + fmt(c.ajuste) + ' kcal · −' + c.pct + '% de mantenimiento';
+    else if (state.goal === 'superavit') adjustLabel = 'Superávit de ' + fmt(c.ajuste) + ' kcal · +' + c.pct + '% de mantenimiento';
+    else adjustLabel = 'Calorías de mantenimiento, sin ajuste aplicado';
+
+    var rows = [
+      { k: 'Método utilizado', v: methodLabel },
+      { k: 'TMB (metabolismo basal)', v: fmt(c.tmb) + ' kcal' },
+      { k: 'Factor de actividad', v: '×' + fmtFactor(c.factor) },
+      { k: 'Calorías con actividad', v: fmt(c.cal) + ' kcal' },
+      { k: 'ETA (termogénesis 10%)', v: '+' + fmt(c.eta) + ' kcal' },
+      { k: 'Calorías de mantenimiento', v: fmt(c.maint) + ' kcal', hi: true },
+      { k: 'Ajuste aplicado', v: (state.goal === 'deficit' ? '−' : state.goal === 'superavit' ? '+' : '') + fmt(c.ajuste) + ' kcal' }
+    ];
+    var rowsHtml = rows.map(function(r){
+      return '<div class="rrow"><span class="rk">' + r.k + '</span><span class="rv' + (r.hi ? ' hi' : '') + '">' + r.v + '</span></div>';
+    }).join('');
+
+    return '' +
+      '<p class="slabel">Resultados</p>' +
+      '<h2 class="stitle">Tus resultados</h2>' +
+      '<div class="rhero">' +
+        '<p class="rgoal">Calorías objetivo · ' + goalLabel + '</p>' +
+        '<p class="rnum"><span id="rnumVal">0</span> <small>kcal/día</small></p>' +
+        '<p class="rcap">' + adjustLabel + '</p>' +
+      '</div>' +
+      '<div class="rrows">' + rowsHtml + '</div>';
+  }
+
+  function buildStepHTML(step){
+    if (step === 1) return buildStep1();
+    if (step === 2) return buildStep2();
+    if (step === 3) return buildStep3();
+    if (step === 4) return buildStep4();
+    return '';
+  }
+
+  function updateFieldUI(key){
+    var msg = validateField(key);
+    state.errors[key] = msg;
+    var inputEl = document.getElementById('f-' + key);
+    var errEl = document.getElementById('err-' + key);
+    if (!inputEl || !errEl) return;
+    if (msg) { inputEl.classList.add('err'); errEl.textContent = msg; errEl.classList.add('show'); }
+    else { inputEl.classList.remove('err'); errEl.textContent = ''; errEl.classList.remove('show'); }
+  }
+
+  function updateLeanEstimate(){
+    var el = document.getElementById('leanEstLabel');
+    if (!el) return;
+    var est = effLean();
+    el.textContent = (est > 0 ? fmt(est) : '—') + ' kg';
+  }
+
+  function renderStepInner(){
+    var wrap = document.getElementById('stepWrap');
+    if (!wrap) return;
+    wrap.innerHTML = buildStepHTML(state.step);
+    bindStepEvents(state.step);
+  }
+
+  function refresh(){
+    renderStepInner();
+    renderNav();
+  }
+
+  function bindStepEvents(step){
+    var wrap = document.getElementById('stepWrap');
+    if (step === 1) {
+      wrap.querySelector('#mMifflin').addEventListener('click', function(){ selectMethod('mifflin'); });
+      wrap.querySelector('#mKatch').addEventListener('click', function(){ selectMethod('katch'); });
+    } else if (step === 2) {
+      if (state.method === 'mifflin') {
+        wrap.querySelector('#segMale').addEventListener('click', function(){ state.sex = 'male'; state.errors.sex = null; refresh(); });
+        wrap.querySelector('#segFemale').addEventListener('click', function(){ state.sex = 'female'; state.errors.sex = null; refresh(); });
+        ['weight', 'height', 'age'].forEach(function(k){
+          var inp = wrap.querySelector('#f-' + k);
+          inp.addEventListener('input', function(e){ state[k] = e.target.value; if (state.errors[k]) updateFieldUI(k); });
+          inp.addEventListener('blur', function(){ updateFieldUI(k); });
+        });
+      } else if (state.method === 'katch') {
+        wrap.querySelector('#bfToggle').addEventListener('click', function(){ state.useBF = !state.useBF; state.errors = {}; refresh(); });
+        if (state.useBF) {
+          ['weight', 'bodyFat'].forEach(function(k){
+            var inp = wrap.querySelector('#f-' + k);
+            inp.addEventListener('input', function(e){ state[k] = e.target.value; if (state.errors[k]) updateFieldUI(k); updateLeanEstimate(); });
+            inp.addEventListener('blur', function(){ updateFieldUI(k); });
+          });
+        } else {
+          var inp = wrap.querySelector('#f-leanMass');
+          inp.addEventListener('input', function(e){ state.leanMass = e.target.value; if (state.errors.leanMass) updateFieldUI('leanMass'); });
+          inp.addEventListener('blur', function(){ updateFieldUI('leanMass'); });
+        }
+      }
+    } else if (step === 3) {
+      wrap.querySelector('#lifestyleFactor').addEventListener('change', function(e){
+        state.lifestyleFactor = e.target.value === '' ? null : parseFloat(e.target.value);
+        refresh();
+      });
+      wrap.querySelector('#exerciseFactor').addEventListener('change', function(e){
+        state.exerciseFactor = e.target.value === '' ? null : parseFloat(e.target.value);
+        refresh();
+      });
+      wrap.querySelector('#goalMaint').addEventListener('click', function(){ state.goal = 'mantenimiento'; refresh(); });
+      wrap.querySelector('#goalDef').addEventListener('click', function(){ state.goal = 'deficit'; if (state.adjustPct === null) state.adjustPct = 10; refresh(); });
+      wrap.querySelector('#goalSup').addEventListener('click', function(){ state.goal = 'superavit'; if (state.adjustPct === null) state.adjustPct = 10; refresh(); });
+      var range = wrap.querySelector('#adjustRange');
+      if (range) {
+        range.addEventListener('input', function(e){
+          state.adjustPct = parseInt(e.target.value, 10);
+          e.target.style.setProperty('--pct-fill', state.adjustPct + '%');
+          var label = wrap.querySelector('#adjustPctLabel');
+          if (label) label.textContent = state.adjustPct + '%';
+        });
+      }
+    }
+  }
+
+  function selectMethod(m){
+    if (state.method !== m) {
+      state.sex = null; state.weight = ''; state.height = ''; state.age = '';
+      state.leanMass = ''; state.bodyFat = ''; state.useBF = false; state.errors = {};
+    }
+    state.method = m;
+    refresh();
+  }
+
+  function renderNav(){
+    var nav = document.getElementById('nav');
+    var showPrev = state.step > 1;
+    var nextLabel = state.step === 4 ? 'Empezar de nuevo' : state.step === 3 ? 'Ver resultados' : 'Siguiente paso';
+    var disabled = false;
+    if (state.step === 1) disabled = !state.method;
+    else if (state.step === 3) disabled = !canProceedStep3();
+    nav.innerHTML = (showPrev ? '<button type="button" class="btn prev" id="btnPrev">Anterior</button>' : '') +
+      '<button type="button" class="btn next" id="btnNext"' + (disabled ? ' disabled' : '') + '>' + nextLabel + '</button>';
+    document.getElementById('btnNext').addEventListener('click', onNext);
+    if (showPrev) document.getElementById('btnPrev').addEventListener('click', onPrev);
+  }
+
+  function onNext(){
+    if (state.step === 4) { resetAll(); return; }
+    if (state.step === 1) {
+      if (!state.method) return;
+      navigateTo(2, 1);
+      return;
+    }
+    if (state.step === 2) {
+      var res = validateStep2All();
+      renderStepInner();
+      if (!res.ok) {
+        var target = res.firstInvalid === 'sex' ? document.getElementById('segMale') : document.getElementById('f-' + res.firstInvalid);
+        if (target) target.focus();
+        return;
+      }
+      navigateTo(3, 1);
+      return;
+    }
+    if (state.step === 3) {
+      if (!canProceedStep3()) return;
+      navigateTo(4, 1);
+      return;
+    }
+  }
+
+  function onPrev(){
+    navigateTo(Math.max(1, state.step - 1), -1);
+  }
+
+  function navigateTo(newStep, dir){
+    state.step = newStep;
+    state.dir = dir;
+    var stepBody = document.getElementById('stepBody');
+    stepBody.innerHTML = '';
+    var wrapper = document.createElement('div');
+    wrapper.id = 'stepWrap';
+    wrapper.className = 'step' + (dir < 0 ? ' rev' : '');
+    stepBody.appendChild(wrapper);
+    renderStepInner();
+    updateStepper();
+    renderNav();
+    if (newStep === 4) animateFinal();
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  function resetAll(){
+    state.method = null; state.sex = null; state.weight = ''; state.height = ''; state.age = '';
+    state.leanMass = ''; state.bodyFat = ''; state.useBF = false;
+    state.lifestyleFactor = null; state.exerciseFactor = null; state.goal = null; state.adjustPct = null; state.errors = {};
+    navigateTo(1, -1);
+  }
+
+  function animateFinal(){
+    var target = compute().fin;
+    var el = document.getElementById('rnumVal');
+    if (!el) return;
+    if (finalRAF) cancelAnimationFrame(finalRAF);
+    if (finalTO) clearTimeout(finalTO);
+    var start = performance.now(), dur = 950;
+    finalTO = setTimeout(function(){
+      if (finalRAF) cancelAnimationFrame(finalRAF);
+      el.textContent = fmt(target);
+    }, dur + 250);
+    function tick(t){
+      var p = Math.min(1, (t - start) / dur);
+      var eOut = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eOut);
+      if (p < 1) finalRAF = requestAnimationFrame(tick);
+    }
+    finalRAF = requestAnimationFrame(tick);
+  }
+
+  function init(){
+    var labels = ['Método', 'Datos', 'Objetivo', 'Resultado'];
+    document.getElementById('dots').innerHTML = labels.map(function(label, i){
+      return '<div class="col"><div class="dot" id="dot' + (i + 1) + '"></div><div class="dcap" id="cap' + (i + 1) + '">' + label + '</div></div>';
+    }).join('');
+    var stepBody = document.getElementById('stepBody');
+    var wrapper = document.createElement('div');
+    wrapper.id = 'stepWrap';
+    wrapper.className = 'step';
+    stepBody.appendChild(wrapper);
+    renderStepInner();
+    updateStepper();
+    renderNav();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
